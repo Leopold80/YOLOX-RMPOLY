@@ -1,3 +1,57 @@
+本算法为适应robomaster比赛，而改动自矩形识别的yolox算法。
+
+
+基于旷视科技YOLOX，实现对不规则四边形的目标检测
+
+更改/添加标注：
+
+    1.yolox/models/yolox_polyhead.py:
+        1.1继承yolox/models/yolo_head.py YOLOXHead类，修改代码使其输出变为四点。
+            1.1.1修改构造函数
+            1.1.2修改get_output_and_grid函数，使其grid变为4对xy坐标的形式
+            1.1.3修改forward函数
+            1.1.4修改get_loses
+            1.1.5把自带的l1损失函数改成smoothl1，注意它自带的是算的xywh，要改成xyxyxyxy
+                 正样本匹配策略还是依靠dynamic-k，用的是不规则四边形的最小外接矩形的iou
+
+    2.yolox/models/losses.py:（弃用）
+    新增PolyIOULoss类，iou是四边形的最小外接矩形iou，并新增四个坐标点的smoothl1_loss(弃用）
+
+    3.yolox/utils/boxes.py:
+        3.1增加order_corners函数，用于给不规则四边形的四个点排序
+        3.2增加minimum_outer_rect函数，用于求解四边形的最小外接矩形
+        3.3增加poly_adjust_box_anns函数
+
+    4.新增exps/yolox_s_rmpoly.py配置文件
+        
+
+    5.新增yolox/exp/yolox_poly_base.py配置文件基类
+
+    6.新增yolox/data/datasets/rmpoly.py
+        6.1新增RMPOLYDataset类
+            6.1.1修改数据集读取方式，读取八点
+            6.1.2修改pull_item
+            6.1.3修改load_anno
+
+    7.yolox/data/data_augment.py
+        7.1新增PolyTrainTransform类，对四点数据进行数据增强（未完待续）
+        7.2poly_random_affine
+        7.2poly_apply_affine_to_bboxes
+
+    8.yolox/data/datasets/mosaicdetection.py
+        8.1新增PolyMosaicDetection（未完待续）
+        8.2_polymirror
+
+    9.yolox/models/yolox.py
+        9.1 YOLOX类：
+        为了适应yolox/models/yolox_polyhead.py中YOLOXPolyHead类的get_losses函数返回字典，修改forward函数中训练时返回值。（弃用）
+
+
+    可以试着把求解回归损失的smoothl1_loss改成归一化后的坐标再求损失。
+
+
+
+
 <div align="center"><img src="assets/logo.png" width="350"></div>
 <img src="assets/demo.png" >
 
