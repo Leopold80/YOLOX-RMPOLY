@@ -3,6 +3,8 @@
 
 基于旷视科技YOLOX，实现对不规则四边形的目标检测
 
+TODO 修改onnx推理模型
+
 更改/添加标注：
 
     1.yolox/models/yolox_polyhead.py:
